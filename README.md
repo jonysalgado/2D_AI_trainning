@@ -1,4 +1,6 @@
-# jony_team
+# AI study
+
+![](./logo_lado.PNG)
 
 This is a repository for study Artificial inteligence for robotic movel, in this case, soccer simulation 2D.
 
