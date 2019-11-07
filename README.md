@@ -1,4 +1,4 @@
-# jony_team
+# ferraresi_team
 
 This is a repository for study Artificial inteligence for robotic movel, in this case, soccer simulation 2D.
 
