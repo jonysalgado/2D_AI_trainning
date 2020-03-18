@@ -54,9 +54,9 @@ class State(object):
 
 
 class MoveForwardStateBall(State):
-    def __init__(self, collidePlayer):
+    def __init__(self, collidePlayers):
         super().__init__("MoveForward")
-        self.collidePlayer = collidePlayer
+        self.collidePlayers = collidePlayers
     def check_transition(self, agent, state_machine):  
         if agent.get_bumper_state():
             state_machine.change_state(Reflection())
@@ -67,14 +67,13 @@ class MoveForwardStateBall(State):
         
 
     def execute(self, agent):
-        if self.collidePlayer:
+        if self.collidePlayers:
             agent.set_cont_friction(True)
         else:
             agent.set_cont_friction(False, 1)
         velocity = math.fabs(agent.linear_speed)-math.fabs(GRAVITY_ACCLERATION*FRICTION_SLOWDOWN*(agent.cont_friction)**(1/3)*SAMPLE_TIME/100)
         if velocity < 0:
             velocity = 0
-        # print(velocity, agent.linear_speed, agent.cont_friction)
         agent.set_velocity(velocity,0)
        
         agent.move()
@@ -82,10 +81,10 @@ class MoveForwardStateBall(State):
 class Reflection(State):
     def __init__(self):
         super().__init__("Reflection")
-        self.collidePlayer = False
+        self.collidePlayers = False
     def check_transition(self, agent, state_machine):  
         self.rotation(agent)
-        state_machine.change_state(MoveForwardStateBall(self.collidePlayer))
+        state_machine.change_state(MoveForwardStateBall(self.collidePlayers))
 
     
     def rotation(self, agent):
@@ -109,52 +108,34 @@ class Reflection(State):
             agent.pose.rotation = TransformPolar(coordinate.x, -1*coordinate.y).rotation
 
         # Collision with other players
-        dist_player1 = math.sqrt((agent.pose.position.x - agent.posPlayer1.position.x)**2+(agent.pose.position.y - agent.posPlayer1.position.y)**2)
-        dist_player2 = math.sqrt((agent.pose.position.x - agent.posPlayer2.position.x)**2+(agent.pose.position.y - agent.posPlayer2.position.y)**2)
+        dist_player1 = math.sqrt((agent.pose.position.x - agent.posPlayer[0].position.x)**2+(agent.pose.position.y - agent.posPlayer[0].position.y)**2)
+        dist_player2 = math.sqrt((agent.pose.position.x - agent.posPlayer[1].position.x)**2+(agent.pose.position.y - agent.posPlayer[1].position.y)**2)
         if dist_player1 <=(agent.radius + RADIUS_PLAYER1):
-            self.collidePlayer1(agent)
-            self.collidePlayer = True
+            self.collidePlayer(agent, 0)
+            self.collidePlayers = True
         if dist_player2 <=(agent.radius + RADIUS_PLAYER2):
-            self.collidePlayer2(agent)
-            self.collidePlayer = True
+            self.collidePlayer(agent, 1)
+            self.collidePlayers = True
 
 
 
-    def collidePlayer1(self, agent):
+    def collidePlayer(self, agent, num):
         if agent.linear_speed < 1.0e-2:
-            agent.linear_speed = agent.speedPlayer1
+            agent.linear_speed = agent.speedPlayer[num]
         velocityBall = TransformCartesian(agent.linear_speed, agent.pose.rotation)
         velocityBall = Vector2(velocityBall.x, velocityBall.y)
-        velocityPlayer1 = TransformCartesian(agent.speedPlayer1, agent.posPlayer1.rotation)
-        velocityPlayer1 = Vector2(velocityPlayer1.x, velocityPlayer1.y)
-        dirvector = Vector2(agent.pose.position.x - agent.posPlayer1.position.x, agent.pose.position.y - agent.posPlayer1.position.y)
+        velocityPlayer = TransformCartesian(agent.speedPlayer[num], agent.posPlayer[num].rotation)
+        velocityPlayer = Vector2(velocityPlayer.x, velocityPlayer.y)
+        dirvector = Vector2(agent.pose.position.x - agent.posPlayer[num].position.x, agent.pose.position.y - agent.posPlayer[num].position.y)
         dirvector.normalize()
         u1 = velocityBall.dot(dirvector)
         u1normal = Vector2(velocityBall.x - u1 * dirvector.x,velocityBall.y - u1 * dirvector.y)
-        u2 = velocityPlayer1.dot(dirvector)
+        u2 = velocityPlayer.dot(dirvector)
         v1 = ((BALL_MASS - PLAYER_MASS) * u1 + 2 * BALL_MASS * u2) / ( BALL_MASS + PLAYER_MASS)
         vfinal = Vector2(u1normal.x + v1 * dirvector.x,u1normal.y + v1 * dirvector.y)
-        vfinal = TransformPolar(vfinal.x, vfinal.y)
+        vfinal = TransformPolar(2*vfinal.x, 2*vfinal.y)
         agent.linear_speed, agent.pose.rotation = vfinal.linear_speed, vfinal.rotation
         print(agent.linear_speed, agent.pose.rotation)
-
-    def collidePlayer2(self, agent):
-        if agent.linear_speed < 1.0e-2:
-            agent.linear_speed = agent.speedPlayer2
-        velocityBall = TransformCartesian(agent.linear_speed, agent.pose.rotation)
-        velocityBall = Vector2(velocityBall.x, velocityBall.y)
-        velocityPlayer2 = TransformCartesian(agent.speedPlayer2, agent.posPlayer2.rotation)
-        velocityPlayer2 = Vector2(velocityPlayer2.x, velocityPlayer2.y)
-        dirvector = Vector2(agent.pose.position.x - agent.posPlayer2.position.x, agent.pose.position.y - agent.posPlayer2.position.y)
-        dirvector.normalize()
-        u1 = velocityBall.dot(dirvector)
-        u1normal = Vector2(velocityBall.x - u1 * dirvector.x,velocityBall.y - u1 * dirvector.y)
-        u2 = velocityPlayer2.dot(dirvector)
-        v1 = ((BALL_MASS - PLAYER_MASS) * u1 + 2 * BALL_MASS * u2) / ( BALL_MASS + PLAYER_MASS)
-        vfinal = Vector2(u1normal.x + v1 * dirvector.x,u1normal.y + v1 * dirvector.y)
-        vfinal = TransformPolar(vfinal.x, vfinal.y)
-        agent.linear_speed, agent.pose.rotation = vfinal.linear_speed, vfinal.rotation
-        
         
 
     def execute(self, agent):

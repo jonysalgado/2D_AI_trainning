@@ -37,10 +37,8 @@ class Ball(object):
         :param behavior: the robot's behavior (finite state machine or behavior tree).
         """
         self.pose = pose
-        self.posPlayer1 = None
-        self.posPlayer2 = None
-        self.speedPlayer1 = None
-        self.speedPlayer2 = None
+        self.posPlayer = None
+        self.speedPlayer = None
         self.linear_speed = 0.0
         self.angular_speed = 0.0
         self.max_linear_speed = max_linear_speed

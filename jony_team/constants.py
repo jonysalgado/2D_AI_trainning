@@ -1,8 +1,8 @@
 from math import pi
 # Simulation Parameters
 # soccer field (105,68) x 6
-SCREEN_WIDTH = 636
-SCREEN_HEIGHT = 414
+SCREEN_WIDTH = 1000 # 636
+SCREEN_HEIGHT = 600 # 414
 PIX2M = 0.01  # factor to convert from pixels to meters
 M2PIX = 100.0  # factor to convert from meters to pixels
 
