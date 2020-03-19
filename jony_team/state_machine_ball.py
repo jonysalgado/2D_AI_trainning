@@ -60,12 +60,6 @@ class MoveForwardStateBall(State):
     def check_transition(self, agent, state_machine):  
         if agent.get_bumper_state():
             state_machine.change_state(Reflection())
-
-      
-
-
-        
-
     def execute(self, agent):
         if self.collidePlayers:
             agent.set_cont_friction(True)
@@ -85,8 +79,6 @@ class Reflection(State):
     def check_transition(self, agent, state_machine):  
         self.rotation(agent)
         state_machine.change_state(MoveForwardStateBall(self.collidePlayers))
-
-    
     def rotation(self, agent):
         # detect collision with walls
         coordinate = TransformCartesian(agent.linear_speed, agent.pose.rotation)
@@ -110,10 +102,10 @@ class Reflection(State):
         # Collision with other players
         dist_player1 = math.sqrt((agent.pose.position.x - agent.posPlayer[0].position.x)**2+(agent.pose.position.y - agent.posPlayer[0].position.y)**2)
         dist_player2 = math.sqrt((agent.pose.position.x - agent.posPlayer[1].position.x)**2+(agent.pose.position.y - agent.posPlayer[1].position.y)**2)
-        if dist_player1 <=(agent.radius + RADIUS_PLAYER1):
+        if dist_player1 <=(agent.radius + RADIUS_PLAYER):
             self.collidePlayer(agent, 0)
             self.collidePlayers = True
-        if dist_player2 <=(agent.radius + RADIUS_PLAYER2):
+        if dist_player2 <=(agent.radius + RADIUS_PLAYER):
             self.collidePlayer(agent, 1)
             self.collidePlayers = True
 
@@ -122,6 +114,7 @@ class Reflection(State):
     def collidePlayer(self, agent, num):
         if agent.linear_speed < 1.0e-2:
             agent.linear_speed = agent.speedPlayer[num]
+
         velocityBall = TransformCartesian(agent.linear_speed, agent.pose.rotation)
         velocityBall = Vector2(velocityBall.x, velocityBall.y)
         velocityPlayer = TransformCartesian(agent.speedPlayer[num], agent.posPlayer[num].rotation)
@@ -135,6 +128,11 @@ class Reflection(State):
         vfinal = Vector2(u1normal.x + v1 * dirvector.x,u1normal.y + v1 * dirvector.y)
         vfinal = TransformPolar(2*vfinal.x, 2*vfinal.y)
         agent.linear_speed, agent.pose.rotation = vfinal.linear_speed, vfinal.rotation
+        if u1 < 0:
+            if agent.pose.rotation > 1.0e-2:
+                agent.pose.rotation *= -1
+            else:
+                agent.pose.rotation = pi
         print(agent.linear_speed, agent.pose.rotation)
         
 

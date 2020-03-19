@@ -30,6 +30,10 @@ class Vector2(object):
     def magnitude(self):
         return math.sqrt((self.x)**2 + (self.y)**2)
 
+    # padronization: angle in degrees
+    def rotation(self, angle):
+        return Vector2(self.x*math.cos(angle), self.y*math.sin(angle))
+
 class Pose(object):
     """
     Represents a pose on the plane, i.e. a (x, y) position plus a rotation.

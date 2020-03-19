@@ -1,5 +1,6 @@
 from math import sin, cos, fabs
 from constants import SAMPLE_TIME
+from utils import *
 
 
 def clamp(value, min, max):
@@ -35,6 +36,8 @@ class Roomba(object):
         :param radius: the robot's radius.
         :type radius: float
         :param behavior: the robot's behavior (finite state machine or behavior tree).
+        :param bumper_state: its mean if robot colide with other robots or wall
+        :type bumper_state: boolean
         """
         self.pose = pose
         self.linear_speed = 0.0
@@ -74,6 +77,8 @@ class Roomba(object):
         :rtype: bool
         """
         return self.bumper_state
+    
+
 
     
 
@@ -101,4 +106,5 @@ class Roomba(object):
         """
         self.behavior.update(self)
         self.move()
+        
 
